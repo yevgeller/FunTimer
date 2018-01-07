@@ -21,31 +21,35 @@ namespace FunTimer.ViewModels
 
         private void InitializeTimeSpans()
         {
-            _totalFunTime = new TimeSpan(0, 0, 0);
-            _totalWorkTime = new TimeSpan(0, 0, 0);
+            WorkTimerDisplayedValue = DisplaySpan(_totalWorkTime);
+            FunTimerDisplayedValue = DisplaySpan(_totalFunTime);
         }
 
         private void InitializeTimers()
         {
-            _funTimer = new DispatcherTimer();
-            _funTimer.Interval = new TimeSpan(0, 0, 1);
+            _funTimer = new DispatcherTimer
+            {
+                Interval = new TimeSpan(0, 0, 1)
+            };
             _funTimer.Tick += FunTimer_Tick;
 
-            _workTimer = new DispatcherTimer();
-            _workTimer.Interval = new TimeSpan(0, 0, 1);
+            _workTimer = new DispatcherTimer
+            {
+                Interval = new TimeSpan(0, 0, 1)
+            };
             _workTimer.Tick += WorkTimer_Tick;
         }
 
         private void WorkTimer_Tick(object sender, object e)
         {
             _totalWorkTime += new TimeSpan(0, 0, 1);
-            WorkTimerValue = DisplaySpan(_totalWorkTime);
+            WorkTimerDisplayedValue = DisplaySpan(_totalWorkTime);
         }
 
         private void FunTimer_Tick(object sender, object e)
         {
             _totalFunTime += new TimeSpan(0, 0, 1);
-            FunTimerValue = DisplaySpan(_totalFunTime);
+            FunTimerDisplayedValue = DisplaySpan(_totalFunTime);
         }
 
         private string DisplaySpan(TimeSpan input)
@@ -66,7 +70,7 @@ namespace FunTimer.ViewModels
         #region Properties 
 
         private string _funTimerVal;
-        public string FunTimerValue
+        public string FunTimerDisplayedValue
         {
             get { return _funTimerVal; }
             set
@@ -80,7 +84,7 @@ namespace FunTimer.ViewModels
         }
 
         private string _workTimerValue;
-        public string WorkTimerValue
+        public string WorkTimerDisplayedValue
         {
             get { return _workTimerValue; }
             set

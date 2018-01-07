@@ -13,7 +13,7 @@ namespace FunTimer.Views
         public MainPage()
         {
             this.InitializeComponent();
-            this.DataContext = new ViewModelOne();
+            //this.DataContext = new ViewModelOne();
         }
     }
 }
