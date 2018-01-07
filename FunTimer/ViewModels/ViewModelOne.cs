@@ -14,9 +14,14 @@ namespace FunTimer.ViewModels
         {
             _startFunTimerCommand = new DelegateCommand(this.StartFunTimerCommandAction, this.CanStartFunTimer);
             _startWorkTimerCommand = new DelegateCommand(this.StartWorkTimerCommandAction, this.CanStartWorkTimer); //add this line to wherever you initialize your commands
+            _resetBothTimersCommand = new DelegateCommand(this.ResetBothTimersCommandAction, this.CanResetBothTimers); //add this line to wherever you initialize your commands
 
             InitializeTimers();
             InitializeTimeSpans();
+            AttachTimerEvents();
+
+            CanStartWorkTimerProperty = true;
+            CanStartFunTimerPropery = true;
         }
 
         private void InitializeTimeSpans()
@@ -27,16 +32,13 @@ namespace FunTimer.ViewModels
 
         private void InitializeTimers()
         {
-            _funTimer = new DispatcherTimer
-            {
-                Interval = new TimeSpan(0, 0, 1)
-            };
-            _funTimer.Tick += FunTimer_Tick;
+            _funTimer = new DispatcherTimer { Interval = new TimeSpan(0, 0, 1) };
+            _workTimer = new DispatcherTimer { Interval = new TimeSpan(0, 0, 1) };
+        }
 
-            _workTimer = new DispatcherTimer
-            {
-                Interval = new TimeSpan(0, 0, 1)
-            };
+        private void AttachTimerEvents()
+        {
+            _funTimer.Tick += FunTimer_Tick;
             _workTimer.Tick += WorkTimer_Tick;
         }
 
@@ -96,6 +98,33 @@ namespace FunTimer.ViewModels
                 }
             }
         }
+
+        private bool _canStartWorkTimer;
+
+        public bool CanStartWorkTimerProperty
+        {
+            get { return _canStartWorkTimer; }
+            set { _canStartWorkTimer = value; }
+        }
+
+        private bool _canStartFunTimer;
+
+        public bool CanStartFunTimerPropery
+        {
+            get { return _canStartFunTimer; }
+            set { _canStartFunTimer = value; }
+        }
+
+        public bool GetFunTimerStarted()
+        {
+            return _funTimer.IsEnabled;
+        }
+
+        public bool GetWorkTimerIsStarted()
+        {
+            return _workTimer.IsEnabled;
+        }
+
         #endregion
 
         #region DelegateCommands
@@ -105,13 +134,14 @@ namespace FunTimer.ViewModels
         {
             _funTimer.Start();
             _workTimer.Stop();
+            CanStartFunTimerPropery = false;
+            CanStartWorkTimerProperty = true;
             CheckIfCommandsCanRun();
         }
 
         private bool CanStartFunTimer(object obj)
         {
-            return _funTimer.IsEnabled == false ||
-                (_totalWorkTime == new TimeSpan(0,0,0) && _totalFunTime == new TimeSpan(0,0,0));
+            return CanStartFunTimerPropery;
         }
 
 
@@ -121,15 +151,33 @@ namespace FunTimer.ViewModels
         {
             _workTimer.Start();
             _funTimer.Stop();
+            CanStartFunTimerPropery = true;
+            CanStartWorkTimerProperty = false;
             CheckIfCommandsCanRun();
         }
 
         private bool CanStartWorkTimer(object obj)
         {
-            return _workTimer.IsEnabled == false || 
-                (_totalWorkTime == new TimeSpan(0,0,0) && _totalFunTime == new TimeSpan(0,0,0));
+            //this was hard to test -- return _workTimer.IsEnabled == false || (_totalWorkTime == new TimeSpan(0,0,0) && _totalFunTime == new TimeSpan(0,0,0));
+            return CanStartWorkTimerProperty;
         }
 
+
+        DelegateCommand _resetBothTimersCommand;
+        public ICommand ResetBothTimersCommand { get { return _resetBothTimersCommand; } }
+        private void ResetBothTimersCommandAction(object obj)
+        {
+            _funTimer.Stop();
+            _workTimer.Stop();
+            CanStartFunTimerPropery = true;
+            CanStartWorkTimerProperty = true;
+            InitializeTimers();
+        }
+
+        private bool CanResetBothTimers(object obj)
+        {
+            return true;
+        }
 
         #endregion
     }

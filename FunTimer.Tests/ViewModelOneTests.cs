@@ -33,10 +33,46 @@ namespace FunTimer.Tests
         [UITestMethod]
         public void CanExecute_FunTimer_When_WorkTimerIsStarted()
         {
+            Assert.IsTrue(vm.StartWorkTimerCommand.CanExecute(null), "Error during setup: cannot start work timer");
+            Assert.IsTrue(vm.StartFunTimerCommand.CanExecute(null), "Error during setup: cannot start fun timer");
+
             vm.StartFunTimerCommand.Execute(null);
 
-            Assert.IsFalse(vm.StartFunTimerCommand.CanExecute(null));
-            Assert.IsTrue(vm.StartWorkTimerCommand.CanExecute(null));
+            Assert.IsFalse(vm.StartFunTimerCommand.CanExecute(null), "Should NOT be able to start fun timer once it is started");
+            Assert.IsTrue(vm.StartWorkTimerCommand.CanExecute(null), "Should be able to start work timer once the fun time is started");
+        }
+
+        [UITestMethod]
+        public void CanExecute_WorkTimer_WhenWorkTimerIsStarted()
+        {
+            Assert.IsTrue(vm.StartWorkTimerCommand.CanExecute(null), "Error during setup: cannot start work timer");
+            Assert.IsTrue(vm.StartFunTimerCommand.CanExecute(null), "Error during setup: cannot start fun timer");
+
+            vm.StartWorkTimerCommand.Execute(null);
+
+            Assert.IsTrue(vm.StartFunTimerCommand.CanExecute(null), "Should be able to start fun timer once it is started");
+            Assert.IsFalse(vm.StartWorkTimerCommand.CanExecute(null), "Should NOT be able to start work timer once the fun time is started");
+        }
+
+        [UITestMethod]
+        public void ResetTimers_BothTimersReset()
+        {
+            bool atLeastOneTimerWasStarted = false;
+
+            vm.StartWorkTimerCommand.Execute(null);
+            vm.StartFunTimerCommand.Execute(null);
+
+            atLeastOneTimerWasStarted = vm.GetFunTimerStarted() || vm.GetWorkTimerIsStarted();
+
+            Assert.IsTrue(atLeastOneTimerWasStarted);
+            Assert.IsTrue(vm.ResetBothTimersCommand.CanExecute(null));
+
+            vm.ResetBothTimersCommand.Execute(null);
+
+            Assert.IsTrue(vm.ResetBothTimersCommand.CanExecute(null));
+            Assert.AreEqual(newTimerExpectedValue, vm.FunTimerDisplayedValue, "When ViewModelOne is initialized, FunTimerValue is not set to 0");
+            Assert.AreEqual(newTimerExpectedValue, vm.WorkTimerDisplayedValue, "When ViewModelOne is initialized, WorkTimerValue is not set to 0");
+
         }
     }
 }
