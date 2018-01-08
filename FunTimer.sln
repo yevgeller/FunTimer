@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FunTimer", "FunTimer\FunTimer.csproj", "{ACFC20B8-B655-4B87-9552-1CA2ACBE44BB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FunTimer.UI", "FunTimer\FunTimer.UI.csproj", "{ACFC20B8-B655-4B87-9552-1CA2ACBE44BB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FunTimer.Tests", "FunTimer.Tests\FunTimer.Tests.csproj", "{4DB042B1-5B50-45C6-80EA-44E28616DDF2}"
 EndProject
