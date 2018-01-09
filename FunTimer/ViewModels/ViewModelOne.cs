@@ -1,4 +1,7 @@
-﻿using FunTimer.ServiceClasses;
+﻿using FunTimer.Lib;
+using FunTimer.Lib.Data;
+using FunTimer.Lib.Models;
+using FunTimer.ServiceClasses;
 using System;
 using System.Windows.Input;
 using Windows.UI.Xaml;
@@ -9,9 +12,27 @@ namespace FunTimer.ViewModels
     {
         DispatcherTimer _funTimer, _workTimer;
         TimeSpan _totalFunTime, _totalWorkTime;
+        IDataLayer _db;
+
         #region Initializers and private methods
         public ViewModelOne()
         {
+            _db = new TextDataLayer("testing.txt");
+
+            for (int i = -5; i < 5; i++)
+            {
+                TimeRecord tr = new TimeRecord
+                {
+                    TimeRecordType = i%2 == 0 ? TimeRecordTypeEnum.FunTimePeriod : TimeRecordTypeEnum.WorkTimePeriod,
+                    StartTime = DateTime.Now.Subtract(new TimeSpan(i, 0, 0)),
+                    EndTime = DateTime.Now.Add(new TimeSpan(i+2, 0, 0))
+                };
+
+                _db.SaveTimeRecord(tr);
+                
+            }
+
+
             _startFunTimerCommand = new DelegateCommand(this.StartFunTimerCommandAction, this.CanStartFunTimer);
             _startWorkTimerCommand = new DelegateCommand(this.StartWorkTimerCommandAction, this.CanStartWorkTimer); //add this line to wherever you initialize your commands
             _resetBothTimersCommand = new DelegateCommand(this.ResetBothTimersCommandAction, this.CanResetBothTimers); //add this line to wherever you initialize your commands
@@ -55,7 +76,7 @@ namespace FunTimer.ViewModels
         }
 
         private string DisplaySpan(TimeSpan input)
-        { //change here -- remove leading zeroes
+        {
             return String.Format("{0} hours {1} min {2} sec", input.Hours,
                            input.Minutes,
                            input.Seconds);
