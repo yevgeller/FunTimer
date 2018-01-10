@@ -16,6 +16,7 @@
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
@@ -23,11 +24,12 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <TextBlock HorizontalAlignment="Center" VerticalAlignment=" center" Text="{Binding FunTimerValue, Mode=OneWay}" FontSize="20"></TextBlock>
-            <TextBlock HorizontalAlignment="Center" VerticalAlignment=" center" Text="{Binding WorkTimerValue, Mode=OneWay}" FontSize="20" Grid.Column="1"></TextBlock>
-            <Button Content="Stop work, start fun!" Command="{Binding StartFunTimerCommand}" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"></Button>
-            <Button Content="Stop fun, start work!" x:Name="stopFunStartWork" Command="{Binding StartWorkTimerCommand}" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"></Button>
-            <Button Content="Reset timers v2" x:Name="Reset" Grid.Row="2" ></Button>
+            <TextBlock HorizontalAlignment="Center" VerticalAlignment=" center" Text="{Binding FunTimerDisplayedValue, Mode=OneWay}" FontSize="20"></TextBlock>
+            <TextBlock HorizontalAlignment="Center" VerticalAlignment=" center" Text="{Binding WorkTimerDisplayedValue, Mode=OneWay}" FontSize="20" Grid.Column="1"></TextBlock>
+            <Button Content="Start fun!" Command="{Binding StartFunTimerCommand}" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"></Button>
+            <Button Content="Work work work!" x:Name="stopFunStartWork" Command="{Binding StartWorkTimerCommand}" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"></Button>
+            <TextBlock Text="{Binding Records}" Grid.Row="2" Grid.Column="1" />
+            <Button Content="Reset timers v2" Command="{Binding ResetBothTimersCommand}" Grid.Row="3" ></Button>
         </Grid>
     </Grid>
 </Page>

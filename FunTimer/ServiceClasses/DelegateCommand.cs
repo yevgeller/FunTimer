@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace FunTimer.ServiceClasses
@@ -16,6 +17,12 @@ namespace FunTimer.ServiceClasses
             this.executeAction = executeAction ?? throw new ArgumentNullException("executeAction");
             this.canExecute = canExecute;
         }
+
+        //public DelegateCommand(Task<object> executeAction, Func<object, bool> canExecute)
+        //{
+        //    this.executeAction = executeAction ?? throw new ArgumentNullException("executeAction");
+        //    this.canExecute = canExecute;
+        //}
 
         public bool CanExecute(object parameter) //can command execute in its current status?
         {

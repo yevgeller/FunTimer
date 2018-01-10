@@ -1,8 +1,10 @@
-﻿using FunTimer.Lib;
-using FunTimer.Lib.Data;
+﻿using FunTimer.Lib.Data;
 using FunTimer.Lib.Models;
 using FunTimer.ServiceClasses;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.UI.Xaml;
 
@@ -12,29 +14,36 @@ namespace FunTimer.ViewModels
     {
         DispatcherTimer _funTimer, _workTimer;
         TimeSpan _totalFunTime, _totalWorkTime;
-        IDataLayer _db;
+        IDataLayerAsync _db;
+        TimeRecord tr;
 
         #region Initializers and private methods
         public ViewModelOne()
         {
-            _db = new TextDataLayer("testing.txt");
+            tr = new TimeRecord { StartTime = DateTime.MinValue, EndTime = DateTime.MinValue };
 
-            for (int i = -5; i < 5; i++)
-            {
-                TimeRecord tr = new TimeRecord
-                {
-                    TimeRecordType = i%2 == 0 ? TimeRecordTypeEnum.FunTimePeriod : TimeRecordTypeEnum.WorkTimePeriod,
-                    StartTime = DateTime.Now.Subtract(new TimeSpan(i, 0, 0)),
-                    EndTime = DateTime.Now.Add(new TimeSpan(i+2, 0, 0))
-                };
+            _db = new TextDataLayerNonStatic("lablabla.txt");
+            //List<TimeRecord> trs = new List<TimeRecord>();
+            //for (int i = -1; i < 2; i++)
+            //{
+            //    TimeRecord tr = new TimeRecord
+            //    {
+            //        TimeRecordType = i % 2 == 0 ? TimeRecordTypeEnum.FunTimePeriod : TimeRecordTypeEnum.WorkTimePeriod,
+            //        StartTime = DateTime.Now.Subtract(new TimeSpan(i, 0, 0)),
+            //        EndTime = DateTime.Now.Add(new TimeSpan(i + 2, 0, 0))
+            //    };
 
-                _db.SaveTimeRecord(tr);
-                
-            }
+            //    trs.Add(tr);
+            //}
 
+            //_db.SaveTimeRecordListAsync(trs);
+
+            //List<TimeRecord> trsOut = GetRecordsFromStorage().ConfigureAwait(false);
+
+            List<TimeRecord> list = _db.GetAllTimeRecordsAsync().Result;
 
             _startFunTimerCommand = new DelegateCommand(this.StartFunTimerCommandAction, this.CanStartFunTimer);
-            _startWorkTimerCommand = new DelegateCommand(this.StartWorkTimerCommandAction, this.CanStartWorkTimer); //add this line to wherever you initialize your commands
+            _startWorkTimerCommand = new DelegateCommand(StartWorkTimerCommandAction, this.CanStartWorkTimer); //add this line to wherever you initialize your commands
             _resetBothTimersCommand = new DelegateCommand(this.ResetBothTimersCommandAction, this.CanResetBothTimers); //add this line to wherever you initialize your commands
 
             InitializeTimers();
@@ -88,6 +97,39 @@ namespace FunTimer.ViewModels
             _startFunTimerCommand.RaiseCanExecuteChanged();
         }
 
+        private async Task ProcessTimeRecord(TimeRecordTypeEnum typeParam)
+        {
+            if (tr.StartTime != DateTime.MinValue)// tr.EndTime != DateTime.MinValue)
+            {
+                tr.EndTime = DateTime.Now;
+                await _db.SaveTimeRecordAsync(tr);
+                tr = new TimeRecord { StartTime = DateTime.Now, TimeRecordType = typeParam };
+            }
+            else
+            {
+                //starting the app
+                tr.StartTime = DateTime.Now;
+                tr.TimeRecordType = typeParam;
+            }
+
+            await RefreshTimeRecords();
+        }
+
+        private async Task RefreshTimeRecords()
+        {
+            List<TimeRecord> allRecords = await _db.GetAllTimeRecordsAsync();
+            List<TimeRecord> todaysRecords = allRecords
+                .Where(x => x.StartTime.DayOfYear == DateTime.Now.DayOfYear && x.StartTime.Year == DateTime.Now.Year)
+                .OrderByDescending(x=>x.StartTime)
+                .ToList();
+
+            string result = string.Empty;
+            foreach (TimeRecord tr in todaysRecords)
+                result += tr.ForDisplay() + Environment.NewLine;
+
+            Records = result;
+        }
+
         #endregion
 
         #region Properties 
@@ -119,6 +161,22 @@ namespace FunTimer.ViewModels
                 }
             }
         }
+
+
+        private string _records;
+        public string Records
+        {
+            get { return _records; }
+            set
+            {
+                if (value != this._records)
+                {
+                    this._records = value;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+
 
         private bool _canStartWorkTimer;
 
@@ -158,6 +216,7 @@ namespace FunTimer.ViewModels
             CanStartFunTimerPropery = false;
             CanStartWorkTimerProperty = true;
             CheckIfCommandsCanRun();
+            ProcessTimeRecord(TimeRecordTypeEnum.WorkTimePeriod).ConfigureAwait(false); ; //this feels like a crutch, but I need to get smarter on async/await
         }
 
         private bool CanStartFunTimer(object obj)
@@ -175,6 +234,7 @@ namespace FunTimer.ViewModels
             CanStartFunTimerPropery = true;
             CanStartWorkTimerProperty = false;
             CheckIfCommandsCanRun();
+            ProcessTimeRecord(TimeRecordTypeEnum.FunTimePeriod).ConfigureAwait(false);
         }
 
         private bool CanStartWorkTimer(object obj)
